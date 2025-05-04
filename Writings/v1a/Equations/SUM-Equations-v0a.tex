@@ -1,0 +1,86 @@
+\documentclass[11pt]{article}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{verbatim}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[utf8]{inputenc}
+\usepackage{afterpage}
+\usepackage{placeins}
+\usepackage{appendix}
+\usepackage{hyperref}
+\usepackage[authoryear]{natbib}
+\usepackage{enumitem}
+\usepackage[margin=1.5in]{geometry}
+
+
+\title{Supply Utilization Balance Modeling Hierarchy Equations}
+\author{Daniel O.}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+\begin{document}
+\maketitle
+
+\section{0-D (Global)}
+
+Consider global cereal production $Y$. The change in stocks in each time step is determined by the balance of supply and utilization, represented as a difference equation:
+
+\begin{equation}
+\Delta\text{Stock} = Y \cdot (1 - \text{seed} - \text{loss} - \text{economic use})  -  \alpha \text{food} \cdot (1 + \text{processing})
+\end{equation}\label{eq:0d-deltastock}
+where seed represents is the proportion of production reserved for seeds, loss represents the proportion of production lost post-harvest due to handling, economic use represents the proportion of production allocated to animal feed and to other economic uses like biofuels, and processing represents the efficiency with which production is transformed into edible products. $\text{food}$ is an estimate of consumption demand of the population $\text{Pop}$ in kilograms based on a given caloric requirment and caloric density of cereals, given in below Equation~\ref{eq:food}:
+
+\begin{equation}\label{eq:food}
+\text{food} = \frac{1000 \cdot \text{Pop} \cdot \text{caloric requirement}}{\text{cereal caloric density}}.
+\end{equation}
+
+The adjustment factor $\alpha\in[0,1]$ represents caloric intake adjustment when the sum of stocks and available food are not sufficient to meet food needs: 
+\begin{equation}
+\alpha = 
+\begin{cases} 
+0 & \text{if } \text{stocks}_{t-1} + \Delta\text{Stock} \geq 0, \\ 
+\frac{\text{stocks}_{t-1} + Y \cdot (1 - \text{seed} - \text{loss} -  \text{economic\_use})}{\text{food}(1 + \text{processing})} & \text{otherwise,}
+\end{cases}
+\end{equation}
+ensuring stocks do not become negative.
+
+\section{1-D}
+ 
+Now disaggregate the globe into N spatial units of cereal production $Y_i$. Each spatial unit is coupled by its exports $E_{ij}$ and imports $I_{ij}$ with every other spatial unit $j\neq i$. The supply utilization balance of spatial unit $i\in[1,N]$ is governed by
+
+\begin{equation}
+\Delta\text{Stock}_i = \text{TradeBalance}_i + Y_i \cdot (1 - \text{seed} - \text{loss} - \text{economic\_use}_i ) - \alpha \text{food} \cdot (1 + \text{processing}_i) ,
+\end{equation}
+where  $\text{TradeBalance}_i = \sum_{\substack{j \neq i}}^{N} ( I_{ij} - E_{ij} )$
+
+
+For the moment, the quantities of cereal exported $E_{ij}$ and imported $I_{ij}$ are determined exogenously.
+
+
+\section*{Appendix: Data Sources}
+
+\begin{table}[h]
+    \makebox[\textwidth][l]{ % Left-align the table
+    \begin{tabular}{|l|c|c|l|}
+        \hline
+        \textbf{Data} & \textbf{Interval} & \textbf{Time Step} & \textbf{Source} \\ 
+        \hline
+        Beginning cereal stocks & 1960--2024 & Yearly & USDA PSD\textsuperscript{1} \\ 
+        \hline
+        Population, trade, allocations \& production & 1961--2023 & Yearly & FAOStat\textsuperscript{2} \\ 
+        \hline
+    \end{tabular}
+    }
+    \caption{\textbf{Data sources and characteristics}. \textsuperscript{1}Unlike the Food and Agriculture Organization (FAO), the United States Department of Agriculture International Statistics Division (USDA PSD, \url{https://apps.fas.usda.gov/psdonline}) is not constrained to only use stock levels reported by national stastitics offices. \textsuperscript{2}There is a discontinuity in the methodology used to estimate allocations circa 2012.}
+    \label{tab:data_sources}
+\end{table}
+
+
+
+
+
+
+\end{document}

@@ -1,0 +1,212 @@
+import pandas as pd
+import requests
+import comtradeapicall
+import numpy as np
+
+subscription_key = '68f75f4351ff423f8da1b3e390ae4d15' # comtrade api subscription key (from comtradedeveloper.un.org)
+directory = r'C:\Users\danie\OneDrive\Desktop\M2 Internship\Data\trade'  # output directory for downloaded files 
+
+#
+#tanzania code is 834
+#
+#maize commodity code is 1005 
+#
+
+#
+#1. Find African country with good data coverage
+#
+
+#a. list of all SSA countries:
+ssa_iso_codes = {
+    "Angola": "AGO",
+    "Benin": "BEN",
+    "Botswana": "BWA",
+    "Burkina Faso": "BFA",
+    "Burundi": "BDI",
+    "Cabo Verde": "CPV",
+    "Cameroon": "CMR",
+    "Central African Republic": "CAF",
+    "Chad": "TCD",
+    "Comoros": "COM",
+    "Democratic Republic of the Congo": "COD",
+    "Republic of the Congo": "COG",
+    "Djibouti": "DJI",
+    "Equatorial Guinea": "GNQ",
+    "Eritrea": "ERI",
+    "Eswatini": "SWZ",
+    "Ethiopia": "ETH",
+    "Gabon": "GAB",
+    "Gambia": "GMB",
+    "Ghana": "GHA",
+    "Guinea": "GIN",
+    "Guinea-Bissau": "GNB",
+    "Ivory Coast": "CIV",
+    "Kenya": "KEN",
+    "Lesotho": "LSO",
+    "Liberia": "LBR",
+    "Madagascar": "MDG",
+    "Malawi": "MWI",
+    "Mali": "MLI",
+    "Mauritania": "MRT",
+    "Mauritius": "MUS",
+    "Mozambique": "MOZ",
+    "Namibia": "NAM",
+    "Niger": "NER",
+    "Nigeria": "NGA",
+    "Rwanda": "RWA",
+    "São Tomé and Príncipe": "STP",
+    "Senegal": "SEN",
+    "Seychelles": "SYC",
+    "Sierra Leone": "SLE",
+    "Somalia": "SOM",
+    "South Africa": "ZAF",
+    "South Sudan": "SSD",
+    "Sudan": "SDN",
+    "Tanzania": "TZA",
+    "Togo": "TGO",
+    "Uganda": "UGA",
+    "Zambia": "ZMB",
+    "Zimbabwe": "ZWE"
+}
+
+monthly_commoditydata_availability = comtradeapicall.getFinalDataAvailability(
+     subscription_key, typeCode='C', freqCode='M', clCode='HS',
+       period=None, reporterCode=None)
+
+ssa_data_availability = {}
+for country,countryISO in list(ssa_iso_codes.items()):
+    ssa_data_availability[country] = monthly_commoditydata_availability[monthly_commoditydata_availability['reporterISO']==countryISO]['period'].unique()
+def plot_data_availabilities(data_availability):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+
+    # Define the range of years and months
+    years = range(2000, 2025)
+    months = range(1, 13)
+    time_labels = [f"{y}{m:02d}" for y in years for m in months]  # Generate all YYYYMM combinations
+
+    # Create a matrix of zeros (0 = no data, 1 = data available)
+    heatmap_data = np.zeros((len(data_availability), len(time_labels)))
+
+    # Fill in the matrix based on available data
+    for i, (country, available_months) in enumerate(data_availability.items()):
+        for month in available_months:
+            if str(month) in time_labels:
+                heatmap_data[i, time_labels.index(str(month))] = 1  # Mark as available
+
+    # Plot the heatmap
+    plt.figure(figsize=(18, len(data_availability) * 0.5))  # Adjust height for readability
+    ax = sns.heatmap(
+        heatmap_data, 
+        cmap=["red", "green"], 
+        cbar=False, 
+        linewidths=0.1, 
+        linecolor="black", 
+        xticklabels=24,  # Show fewer time labels to avoid clutter
+        yticklabels=list(data_availability.keys())
+    )
+
+    # Customize axis labels
+    plt.xlabel("Time (YYYYMM)")
+    plt.ylabel("Country")
+    plt.title("Data Availability Heatmap (2000-2025)")
+
+    # Show the plot
+    plt.show()
+
+plot_data_availabilities(ssa_data_availability)
+
+
+#              #
+#Burkina Faso has good availabity, unbroken from around 2005 to 2025 #
+#               #
+
+#
+#2. Download Burkina Faso import/export data
+#
+
+#a. generate the time period requests (max is 12 months per request)
+start_year = 2000
+end_year = 2025
+year_range = range(start_year, end_year + 1)
+months = [f"{year}{month:02d}" for year in year_range for month in range(1, 13)]
+
+months_strings = [",".join(months[i:i+12]) for i in range(0, len(months), 12)]
+
+#choose rice.
+commodity_HS_refs = comtradeapicall.getReference('cmd:HS')
+commodities = {"Rice":commodity_HS_refs[commodity_HS_refs.text.str.contains("rice", case=False, na=False)].iloc[0].id,
+               "Maize":commodity_HS_refs[commodity_HS_refs.text.str.contains("maize", case=False, na=False)].iloc[0].id,
+               "Wheat":commodity_HS_refs[commodity_HS_refs.text.str.contains("wheat", case=False, na=False)].iloc[0].id,
+               "Sorghum":commodity_HS_refs[commodity_HS_refs.text.str.contains("sorghum", case=False, na=False)].iloc[0].id,
+               "Barley":commodity_HS_refs[commodity_HS_refs.text.str.contains("barley", case=False, na=False)].iloc[0].id,
+                "Oats":'1004',
+                "Millet":commodity_HS_refs[commodity_HS_refs.text.str.contains("millet", case=False, na=False)].iloc[0].id,
+                "Rye":commodity_HS_refs[commodity_HS_refs.text.str.contains("rye", case=False, na=False)].iloc[0].id,
+               }
+
+
+Country_Codes = {"Angola":comtradeapicall.convertCountryIso3ToCode(ssa_iso_codes["Angola"]),
+                 "Senegal":comtradeapicall.convertCountryIso3ToCode(ssa_iso_codes["Senegal"])}
+All_Data = {"Angola":[],"Senegal":[]}
+
+data = pd.DataFrame()
+for country in list(All_Data.keys()):
+    for year in months_strings: #request is as a string of months comma separated, e.g. "200001,200002,..."
+            print(year[0:4])
+            for commodity in list(commodities.values()):
+                mydf = comtradeapicall.getFinalData(subscription_key, typeCode='C', freqCode='M', clCode='HS', period=year,
+                            cmdCode=commodity, flowCode=None, partnerCode=None, reporterCode=Country_Codes[country],
+                            partner2Code=None,
+                            customsCode=None, motCode=None, maxRecords=500, format_output='JSON',
+                            aggregateBy=None, breakdownMode='classic', countOnly=None, includeDesc=True)
+
+                data = pd.concat([data,mydf])
+    #All_Data[country] = data
+    data.to_csv(r"C:\Users\danie\OneDrive\Desktop\M2 Internship\Data\trade"+ "/" + country.replace(" ","")+"_Monthly_Trade_"+"-".join(list(commodities.keys()))+"_2000-2025")
+
+exports_time_series = data[data.flowDesc=='Export'].groupby('refPeriodId')['qty'].sum() #quantity data seems complete: there are zero entries where there's nan or empty: np.sum(data[data.flowDesc=='Export']['qty'].values<10)
+imports_time_series = data[data.flowDesc=='Import'].groupby('refPeriodId')['qty'].sum()
+
+#
+#3. Check agreement with yearly data from COMTRADE also.  P.S. fao trade data comes from comtrade see https://www.un.org/en/desa/new-and-enhanced-trade-data-your-fingertips
+#
+
+#
+#a. upscaled monthly data to yearly:
+#
+exports_time_series.index=pd.to_datetime(exports_time_series.index,format="%Y%m%d")
+yearly_exports_from_monthly = exports_time_series.groupby(exports_time_series.index.year).sum()
+imports_time_series.index=pd.to_datetime(imports_time_series.index,format="%Y%m%d")
+yearly_imports_from_monthly = imports_time_series.groupby(imports_time_series.index.year).sum()
+
+#
+#b. directy yearly data downlaod
+#
+yearly_data = pd.DataFrame()
+for country in list(All_Data.keys()):
+    for year in year_range:
+            year = str(year)
+            for commodity in list(commodities.values()):
+                print(year[0:4])
+                mydf = comtradeapicall.getFinalData(subscription_key, typeCode='C', freqCode='A', clCode='HS', period=year,
+                            cmdCode=commodity, flowCode=None, partnerCode=None, reporterCode=Country_Codes[country],
+                            partner2Code=None,
+                            customsCode=None, motCode=None, maxRecords=500, format_output='JSON',
+                            aggregateBy=None, breakdownMode='classic', countOnly=None, includeDesc=True)
+
+                yearly_data = pd.concat([yearly_data,mydf])
+    #All_Data[country] = data
+    yearly_data.to_csv(r"C:\Users\danie\OneDrive\Desktop\M2 Internship\Data\trade"+ "/" + country.replace(" ","")+"_Yearly_Trade_"+"-".join(list(commodities.keys())))
+
+yearly_exports_direct = yearly_data[yearly_data.flowDesc=='Export'].groupby('refPeriodId')['qty'].sum() #quantity data seems complete: there are zero entries where there's nan or empty: np.sum(data[data.flowDesc=='Export']['qty'].values<10)
+yearly_exports_direct.index = [int(str(index)[0:4]) for index in  yearly_exports_direct.index]
+if np.nanmax(100*(yearly_exports_direct-yearly_exports_from_monthly)/yearly_exports_direct) < 5:
+     print("Monthly export Data of " + "Rice " + "for " + country + "is at most " + str(np.nanmax(100*(yearly_exports_direct-yearly_exports_from_monthly)/yearly_exports_direct)) + " percent different from yearly export data.")
+     print("")
+yearly_imports_direct = yearly_data[yearly_data.flowDesc=='Import'].groupby('refPeriodId')['qty'].sum()
+yearly_imports_direct.index = [int(str(index)[0:4]) for index in  yearly_imports_direct.index]
+if np.nanmax(100*(yearly_imports_direct-yearly_imports_from_monthly)/yearly_imports_direct) < 5:
+        print("Monthly import Data of " +  "Rice " + "for " + country + "is at most " + str(np.nanmax(100*(yearly_imports_direct-yearly_imports_from_monthly)/yearly_imports_direct)) + " percent different from yearly export data.")
+

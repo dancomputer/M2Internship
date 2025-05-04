@@ -1,0 +1,136 @@
+\documentclass[11pt]{article}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{verbatim}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[utf8]{inputenc}
+\usepackage{afterpage}
+\usepackage{placeins}
+\usepackage{appendix}
+\usepackage{hyperref}
+\usepackage[authoryear]{natbib}
+\usepackage{enumitem}
+\usepackage[margin=1.5in]{geometry}
+
+\def\d{{\rm{d}}}
+\def\e{{\rm{e}}}
+
+\definecolor{rred}{rgb}{0.55, 0.0, 0.0}
+\newcommand{\mg}{\color{blue}}
+\newcommand{\mgd}[1]{\textcolor{blue}{\sout{#1}}}
+\newcommand{\cm}[1]{{\color{magenta}\sl[#1]}}
+\newcommand{\oh}{\color{rred}}
+\newcommand{\cmd}[1]{{\color{rred}\sl[#1]}}
+
+\title{ENS Math Library, 28 March 2025}
+\author{Daniel Ohara}
+\graphicspath{{Plots}}
+\date{\today}
+\begin{document}
+\maketitle
+\section{Introduction}
+
+Like about 65\% of the world population (https://doi.org/10.4060/cd1254en), I have stable access to a healthy and culturally appropriate diet. In the world's third food regime characterized by an ever increasing absorption of food into a multi-national corporatism, food is encountered mostly as a kaleidscopic association of projections and packaging. There are even products like butter that is not butter or water to save the planet. Though following their multi-national journey of value addition is difficult, the raw food supply is likely to be from a large scale, capital-intensive monocropping operation. The worlds richest nations have consistently passed from a traditional diet based on cereals to a more meat, sugar, and oil  diet, which due to the former nonetheless requires even more production of cereals. 
+In the shadows of this global agribusiness chain, local territorial agricultural markets and smallholder subsistence agriculture also play an important role in feeding people. In spite of their material neccesity, they also exemplify the possibilities of socio-political resistence to the first-world's vision of development as `feeding the world' through deeper integration into global markets (McMichael 2015). Territorial markets are characterized by shorter supply-chains and more horizontal relationships between farmers, processors, and consumers. The concept of territioral market is essential to explain the frictions and market failures essential to food insecurity.
+Food security began implicitly in the 1970's with highly aggregated national accounts of food production and utilization, which aimed to optimize production. These early supply-utilization balances -- goverend by equation 1(a) -- were used to encourage increased production in developing countries. This led gradually  to the first explicit definition of food security, which is when there is enough food to feed all people. However, referencing many famines where in fact food supply was more than sufficient on a per capita basis, the seminal Amartya Sen showed that food security must in fact also consider access to food. As these concpetions of food security have evolved, so have the quantitative indicators used to measure and predict them. An important question has remained aggregation: though in fact basic, highly aggregated indicators of food security like the prevelance of undernhourhisment have inspired and vulgarized the need for action against hunger, they also have less and less meaning as spatial and temporal resolution increases. More recent indicators, like the food consumption score (FCS), have in their conceptualization implicitly considerations of access, to a wide variety of foods. In this paper, we concpetualize food security according to the modern definition, which has four main aspects: 1) availability 2) access 3) stability) and, more recently, 4) sustainability.
+The dimension of food availability is a neccesary starting point, but not sufficient to fully characterize the phenomena of undernutrition.
+In 2023, nearly 282 million people experienced urgent food crises (FSIN and Global Network Against Food Crises. 2024. GRFC 2024. Rome). With climate change, its even more urgent and globally important.
+
+There is a large history of attempts to address shocks that can give rise to of food crises, i.e. conflict, weather extremes, and economic shocks: food storage and financial. 
+Food storage can be global price controlling, national reserve, or emergency reserves
+Financial can be similar, or like insurances, etc.
+Larger scale projects have often failed.
+Some have been succesful: Ethiopia's grain market stopped famine, i.e. mass deaths. They give encouraging possiblity that national and regional initiatives can  
+
+There are some very large models. Only a small number actually look explicitly at the food security (Jansenns).
+Climate sciences modeling hierarchy is useful. Modeling hierarchy theoretical framework. In the current paper we walk through the construction of a hierarchy in the framework of supply utilization balance.
+
+\section{Modeling Hierarchy}
+\subsection{Zero Dimensional, Global Model}
+
+The zero dimensional case is useful to introduce the basic conservation equation in food security: the supply utilization balance. 
+
+Consider global cereal production $Y$. The change in stocks in each time step is determined by the balance of supply and utilization, represented as a difference equation:
+
+\begin{equation}
+\Delta\text{Stock} = Y \cdot (1 - \text{seed} - \text{loss} - \text{economic use})  -  \alpha \text{food} \cdot (1 + \text{processing})
+\end{equation}\label{eq:0d-deltastock}
+where seed represents is the proportion of production reserved for seeds, loss represents the proportion of production lost post-harvest due to handling, economic use represents the proportion of production allocated to animal feed and to other economic uses like biofuels, and processing represents the efficiency with which production is transformed into edible products. $\text{food}$ is an estimate of consumption demand of the population $\text{Pop}$ in kilograms based on a given caloric requirment and caloric density of cereals, given in below %Equation~\ref{eq:food}:
+
+\begin{equation}\label{eq:food}
+\text{food} = \frac{1000 \cdot \text{Pop} \cdot \text{caloric requirement}}{\text{cereal caloric density}}.
+\end{equation}
+
+The adjustment factor $\alpha\in[0,1]$ represents caloric intake adjustment when the sum of stocks and available food are not sufficient to meet food needs: 
+\begin{equation}
+\alpha = 
+\begin{cases} 
+0 & \text{if } \text{stocks}_{t-1} + \Delta\text{Stock} \geq 0, \\ 
+\frac{\text{stocks}_{t-1} + Y \cdot (1 - \text{seed} - \text{loss} -  \text{economic\_use})}{\text{food}(1 + \text{processing})} & \text{otherwise,}
+\end{cases}
+\end{equation}
+ensuring stocks do not become negative.
+
+The main variables of this SUA reflect the development of the world agro-food system: massivley increasing Y, but also more and more going to economic uses.
+
+A major drawback of the SUA approach is its sensitivity to its parameters, which are in fact highly uncertain. For example, the USDA and the FAO, the two largest distributors of agricultural market data, both estimate their stocks data based on this and have extremely different values (fig. 1). The calibration can be highly subjective and politically motivated: see the case of China. Nonetheless, it becomes clear that in terms of global availability, the quantity of cereals available far suprasses a basic quantity of 1260 kcal/capita/day. One thing this shows is that `demand' generated by farm animals and biofuels is far greater than the demand generated by poor and starving people. Yet perhaps this clearly moral failure is also a market failure (perhaps: see WRI paper.).
+  
+ \section{1 Dimensional, Regional Model}
+With this conception we can begin to consider a level of access on a regional scale. Adding a dimension, the primary mechanism which becomes apparent is trade. Given the highly uncertain parameterization, the most relaible values are trade -- taxation revenue is a priority for governments -- and production. Based on these two quantities, we can estimate the quantity Y-D from eq. 1. In fact, what this theoretical exercise allows us to check is quickly see whether the allocation of supply is so low in certain regions as to not even support the possibility of sufficient food supply, without any economic use. It turns out the Eastern and Middle Africa have chronic undersupply of food, making severe undernutrition an inevitability.
+
+ \section{1 Dimensional, National Model}
+ 
+We can try to begin explaining this undersupply based on national data and the prevelance of undernutrition: fig 1 shows the conditional probability distributions of a large collection indepenent variables for 20 years of prevalacne of undernourhisment for the twenty coutnries of middel adn east africa. These conditional probabilities are particularlly those of conditonal on prevalance of undernourhimsnet greater than and less than a standard deviation from mean, for high and low PoU resepctively. No indivual country had a PoU belonging to both the high and low group within the twenty year time span, so the analysis reveals differences in aggregate rather than marginal, so to say, which is suitable to the long time scale of interest in the PoU anyways. 
+Starts to give more sense to the empirical 1260 kcal figure: is when relativelty low food insecurity arises. The next largest differences, both visually and according to a non-parametric statistical difference test, are in share of agricultural employment and GDP per capita.  
+To summarize we can perform a PCA of the independent, macro-structural variables: the first three components describe 25,15, and 11 percent of the variance, shown in figure 2. The three axises together show a macro-structural space in which high undernourhisment is clearly set apart from low undernourishment: the primary dimenison being related to variations in socio-economic structure, the second the raw agricultural flows as goverend by macroeconomic and climatic factors, and the final being primarily to do with infrastrucutre for transportation.
+
+
+\section{Modeling Hierarchy}
+\subsection{Zero Dimensional, Global Model}
+
+ 
+There are highly complex models of the future food. 
+ 
+
+%\begin{figure}[]
+%\begin{center}
+%\centerline{\includegraphics[width=5.0in]{ConstInvest.png}}
+%\caption{{\textbf{EnBCs with Constant Investment:} $s=0.2$. The variables plotted are (a) output, (b) employment rate, (c) wage, and (d) investment. The beginning of each cycle phase is marked by a colored line, defined in the legend. The cycle periodicity is $5.4$ years.
+%\label{ConstantInvestment}}}
+%\end{center}
+%\end{figure}
+%
+%\begin{table}[ht]
+%\centering
+%\begin{tabular}{c|c|c}
+%Parameter & Description & Value \\\hline
+%$\tau_{\rm dep}$ & Capital depreciation rate & $\frac{1}{5}$ years$^{-1}$ \\
+%$A$ & Productivity & $9.3 \cdot 10^{-2}$ \\
+%\end{tabular}
+%\caption{\textbf{title:}
+%Body
+%}\label{Labelname}
+%\end{table}
+%
+%\begin{enumerate}[label=(\alph*)]
+%\item Cycle asymmetry, with four phases:
+%\begin{enumerate}[label=(\roman*)]
+%\item recovery (year 0 to 1), with investment and employment increasing;
+%\end{enumerate}
+%\end{enumerate}
+%
+
+\bibliographystyle{jponew}
+\bibliography{bib.bib}
+
+
+\end{document}
+
+
+
+
+
+

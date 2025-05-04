@@ -2,6 +2,23 @@ import os
 import pandas as pd
 import xarray as xr
 import numpy as np
+import matplotlib.pyplot as plt
+
+'''
+The purpose of this script is to determine which model to use to estimate historical crop yields,
+by comparing the performance of various ISIMIP models with SPAM data
+
+Ideally, the chosen model should accurately reproduce the interannual spatial variations in crop yields observed in SPAM data
+
+To this end, we will run experiments:
+Hypothesis A: one or several models combined would be similar to the SPAM difference at a 0.5 x 0.5 degree scale 
+1) difference in percent yield from 2000 to 2005 for each model compared with SPAM difference
+    -results: inconclusive, mostly different from SPAM and some areas where bias is consistent across models
+Hypothesis B: one or seveeral models combined would accuaretly reproduce regional yields, i.e. for subsaharan africa
+2) national average yields
+Hypothesis C: none of the crop models are accurate and this reflects differences in methodology between SPAM years: the biophysical validity of the crop modeling should be taken as granted
+3) using simply the median model, i.e. intermodel agreement as criteria for realism 
+'''
 
 def process_netcdf_data(folder_path):
     """
