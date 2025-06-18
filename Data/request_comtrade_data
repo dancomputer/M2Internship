@@ -145,14 +145,16 @@ commodities = {"Rice":commodity_HS_refs[commodity_HS_refs.text.str.contains("ric
                 "Millet":commodity_HS_refs[commodity_HS_refs.text.str.contains("millet", case=False, na=False)].iloc[0].id,
                 "Rye":commodity_HS_refs[commodity_HS_refs.text.str.contains("rye", case=False, na=False)].iloc[0].id,
                }
+#todo: add the roots and tubers
 
+#Country_Codes = {"Angola":comtradeapicall.convertCountryIso3ToCode(ssa_iso_codes["Angola"]),
+#                 "Senegal":comtradeapicall.convertCountryIso3ToCode(ssa_iso_codes["Senegal"])}
+Country_Codes = {"Ethiopia":comtradeapicall.convertCountryIso3ToCode(ssa_iso_codes["Burkina Faso"])}
+#All_Data = {"Angola":[],"Senegal":[]}
+All_Data = {"Ethiopia":[]}
 
-Country_Codes = {"Angola":comtradeapicall.convertCountryIso3ToCode(ssa_iso_codes["Angola"]),
-                 "Senegal":comtradeapicall.convertCountryIso3ToCode(ssa_iso_codes["Senegal"])}
-All_Data = {"Angola":[],"Senegal":[]}
-
-data = pd.DataFrame()
 for country in list(All_Data.keys()):
+    data = pd.DataFrame()
     for year in months_strings: #request is as a string of months comma separated, e.g. "200001,200002,..."
             print(year[0:4])
             for commodity in list(commodities.values()):
