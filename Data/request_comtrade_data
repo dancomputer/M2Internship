@@ -85,7 +85,11 @@ def plot_data_availabilities(data_availability):
     years = range(2000, 2025)
     months = range(1, 13)
     time_labels = [f"{y}{m:02d}" for y in years for m in months]  # Generate all YYYYMM combinations
-
+    #num_ticks = 10
+    # the index of the position of yticks
+    #yticks = np.linspace(0, len(time_labels) - 1, num_ticks, dtype=int)
+    # the content of labels of these yticks
+    #yticklabels = [time_labels[idx] for idx in yticks]
     # Create a matrix of zeros (0 = no data, 1 = data available)
     heatmap_data = np.zeros((len(data_availability), len(time_labels)))
 
@@ -96,24 +100,39 @@ def plot_data_availabilities(data_availability):
                 heatmap_data[i, time_labels.index(str(month))] = 1  # Mark as available
 
     # Plot the heatmap
-    plt.figure(figsize=(18, len(data_availability) * 0.5))  # Adjust height for readability
+    fig = plt.figure(figsize=(18, len(data_availability) * 0.5))  # Adjust height for readability
     ax = sns.heatmap(
         heatmap_data, 
         cmap=["red", "green"], 
         cbar=False, 
         linewidths=0.1, 
         linecolor="black", 
-        xticklabels=24,  # Show fewer time labels to avoid clutter
+        #xticklabels=yticklabels,  # Show fewer time labels to avoid clutter
         yticklabels=list(data_availability.keys())
     )
-
-    # Customize axis labels
+    
+    tick_indices_to_show = []
+    tick_labels_to_display = []
+    for i, timestamp in enumerate(time_labels):
+            if i % 12 == 0:  # Select a tick every three months
+                tick_indices_to_show.append(i)
+                tick_labels_to_display.append(timestamp)
+                #is_january_for_selected_ticks.append(timestamp.month == 1)
+    ax.set_xticks(tick_indices_to_show)
+    REGULAR_TICK_FONTSIZE=12
+    ax.set_xticklabels(tick_labels_to_display, rotation=45, ha='right')
+    #else:
+    plt.xticks(rotation=45, ha='right', fontsize=REGULAR_TICK_FONTSIZE)
+    # --- END X-AXIS TICK HANDLING ---
+# Customize axis labels
     plt.xlabel("Time (YYYYMM)")
+    #plt.xticks(time_labels, rotation=45, ha='right')  # Rotate x-axis labels for better readability
     plt.ylabel("Country")
-    plt.title("Data Availability Heatmap (2000-2025)")
+    plt.title("UN Comtrade Cereals Monthly Trade Data Availability (2000-2025)")
 
     # Show the plot
     plt.show()
+    fig.savefig(r"C:\Users\danie\OneDrive\Desktop\M2 Internship\Data\trade\ssa_data_availability_heatmap.png")#, bbox_inches='tight', dpi=300)
 
 plot_data_availabilities(ssa_data_availability)
 
@@ -146,12 +165,17 @@ commodities = {"Rice":commodity_HS_refs[commodity_HS_refs.text.str.contains("ric
                 "Rye":commodity_HS_refs[commodity_HS_refs.text.str.contains("rye", case=False, na=False)].iloc[0].id,
                }
 #todo: add the roots and tubers
-
+import country_converter as coco
+coco.convert("United States", to='iso3', not_found=None) #test country converter
 #Country_Codes = {"Angola":comtradeapicall.convertCountryIso3ToCode(ssa_iso_codes["Angola"]),
 #                 "Senegal":comtradeapicall.convertCountryIso3ToCode(ssa_iso_codes["Senegal"])}
-Country_Codes = {"Ethiopia":comtradeapicall.convertCountryIso3ToCode(ssa_iso_codes["Burkina Faso"])}
+#Country_Codes = {"Zimbabwe":comtradeapicall.convertCountryIso3ToCode(ssa_iso_codes["Zimbabwe"]),
+#                 "France":comtradeapicall.convertCountryIso3ToCode(coco.convert("France", to='iso3', not_found=None)),
+#                 "United States":comtradeapicall.convertCountryIso3ToCode(coco.convert("United States", to='iso3', not_found=None))}
+Country_Codes = {"Malawi":comtradeapicall.convertCountryIso3ToCode(ssa_iso_codes["Malawi"])}
 #All_Data = {"Angola":[],"Senegal":[]}
-All_Data = {"Ethiopia":[]}
+#All_Data = {"Malawi":[],"France":[],"United States":[]}
+All_Data = {"Malawi":[]}
 
 for country in list(All_Data.keys()):
     data = pd.DataFrame()
